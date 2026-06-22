@@ -10,14 +10,7 @@ export const processInstagramComment = inngest.createFunction(
     concurrency: {
       limit: 5,
     },
-    retries: {
-      attempts: 4,
-      backoff: {
-        initialDelay: '5s',
-        maxDelay: '2h',
-        exponential: 2,
-      },
-    },
+    retries: 4,
   },
   { event: 'instagram/comment.received' },
   async ({ event, step }) => {
