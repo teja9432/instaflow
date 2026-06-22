@@ -1,5 +1,5 @@
 import { inngest } from './client';
-import { NonRetryableError } from 'inngest';
+import { NonRetriableError } from 'inngest';
 import { prisma } from '@/lib/prisma';
 import { checkIfFollowing, sendInstagramDM, MetaApiError } from '@/lib/meta';
 
@@ -109,7 +109,7 @@ export const processInstagramComment = inngest.createFunction(
           }
           
           if (isAuthError || isInvalidParam) {
-            throw new NonRetryableError(`Meta Permanent Error (code ${dmErr.code}): ${dmErr.message}`);
+            throw new NonRetriableError(`Meta Permanent Error (code ${dmErr.code}): ${dmErr.message}`);
           }
         }
         
