@@ -1,0 +1,68 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  password          String
+  name              String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  instagramAccounts InstagramAccount[]
+}
+
+model InstagramAccount {
+  id              String       @id @default(cuid())
+  userId          String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instagramId     String       @unique
+  username        String
+  profilePicture  String?
+  accessToken     String       // User token
+  pageId          String       @unique
+  pageAccessToken String       // Page access token for Webhooks / DMs
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  automations     Automation[]
+  logs            ActivityLog[]
+}
+
+model Automation {
+  id                 String           @id @default(cuid())
+  instagramAccountId String
+  instagramAccount   InstagramAccount @relation(fields: [instagramAccountId], references: [id], onDelete: Cascade)
+  postId             String           // Instagram media ID
+  postMediaUrl       String?          // CDN link for UI preview
+  postCaption        String?          // Post title/text snippet
+  triggerKeyword     String           // Trigger word (e.g. "PDF")
+  pdfUrl             String           // Asset URL
+  successMessage     String           // Custom DM body for followers
+  fallbackMessage    String           // Custom DM body for non-followers
+  isActive           Boolean          @default(true)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  logs               ActivityLog[]
+}
+
+model ActivityLog {
+  id                 String            @id @default(cuid())
+  instagramAccountId String
+  instagramAccount   InstagramAccount  @relation(fields: [instagramAccountId], references: [id], onDelete: Cascade)
+  automationId       String?
+  automation         Automation?       @relation(fields: [automationId], references: [id], onDelete: SetNull)
+  commentId          String            @unique
+  commentText        String
+  commenterUsername  String
+  commenterId        String
+  isFollower         Boolean
+  status             String            // "SENT_SUCCESS", "SENT_FALLBACK", "FAILED"
+  errorDetails       String?
+  timestamp          DateTime          @default(now())
+}
